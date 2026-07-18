@@ -69,18 +69,47 @@ class VehicleTest(APITestCase):
         )
         self.assertEqual(response.status_code,status.HTTP_200_OK)
 
-        def test_delete_vehicle(self):
+    def test_delete_vehicle(self):
+            
+        vehicle = Vehicles.objects.create(
+            make="BMW",
+            model="M4",
+            category="Sports",
+            price=8500000,
+            quantity=5
+        )
 
-            vehicle = Vehicles.objects.create(
-                make="BMW",
-                model="M4",
-                category="Sports",
-                price=8500000,
-                quantity=5
-            )
+        response = self.client.delete(
+            f"/api/vehicles/{vehicle.id}/"
+        )
 
-            response = self.client.delete(
-                f"/api/vehicles/{vehicle.id}/"
-            )
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
-            self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+    def test_purchase_vehicle(self):
+        vehicle = Vehicles.objects.create(
+            make="BMW",
+            model="M4",
+            category="Sports",
+            price=8500000,
+            quantity=5
+        )
+        response=self.client.post(
+            f"/api/vehicles/{vehicle.id}/purchase/"
+        )
+        vehicle.refresh_from_db()
+
+        self.assertEqual(response.status_code,status.HTTP_200_OK)
+        self.assertEqual(vehicle.quantity,4)
+    
+    def test_purchase_out_of_stock(self):
+        vehicle=Vehicles.objects.create(
+            make="BMW",
+            model="M4",
+            category="Sports",
+            price=8500000,
+            quantity=0
+        )
+        response=self.client.post(
+            f"/api/vehicles/{vehicle.id}/purchase/"
+        )
+        self.assertEqual(response.status_code,status.HTTP_400_BAD_REQUEST)
