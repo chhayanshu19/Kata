@@ -6,12 +6,13 @@ import Dashboard from "./pages/Dashboard";
 import VehicleForm from "./pages/VehicleForm";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminRoute from "./components/AdminRoute";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-
         <Route path="/" element={<Login />} />
 
         <Route path="/login" element={<Login />} />
@@ -45,8 +46,16 @@ function App() {
           }
         />
 
-        <Route path="*" element={<NotFound />} />
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute>
+              <AdminDashboard />
+            </AdminRoute>
+          }
+        />
 
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );
