@@ -11,6 +11,7 @@ export default function AuthProvider({ children }) {
   const loginUser = (data) => {
     localStorage.setItem("accessToken", data.access);
     localStorage.setItem("isStaff", data.is_staff);
+    localStorage.setItem("refreshToken", data.refresh);
 
     setUser({
       token: data.access,
@@ -20,6 +21,7 @@ export default function AuthProvider({ children }) {
 
   const logoutUser = () => {
     localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
     localStorage.removeItem("isStaff");
 
     setUser({

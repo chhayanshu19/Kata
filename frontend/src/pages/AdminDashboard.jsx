@@ -2,10 +2,18 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import Navbar from "../components/Navbar";
-import { getVehicles, deleteVehicle } from "../services/vehicleService";
+import {
+  getVehicles,
+  deleteVehicle,
+  restockVehicle,
+} from "../services/vehicleService";
+import Modal from "../components/Modal";
 
 export default function AdminDashboard() {
   const [vehicles, setVehicles] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedVehicle, setSelectedVehicle] = useState(null);
+  const [restockQuantity, setRestockQuantity] = useState("");
 
   useEffect(() => {
     fetchVehicles();
@@ -38,6 +46,37 @@ export default function AdminDashboard() {
       alert("Failed to delete vehicle.");
     }
   }
+  const handleRestock = (vehicle) => {
+    setSelectedVehicle(vehicle);
+
+    setRestockQuantity("");
+
+    setIsModalOpen(true);
+  };
+  const submitRestock = async () => {
+    if (!restockQuantity || Number(restockQuantity) <= 0) {
+      alert("Please enter a valid quantity.");
+      return;
+    }
+
+    try {
+      await restockVehicle(selectedVehicle.id, Number(restockQuantity));
+
+      const data = await getVehicles();
+
+      setVehicles(data.results);
+
+      setIsModalOpen(false);
+      setSelectedVehicle(null);
+      setRestockQuantity("");
+    } catch (error) {
+      console.error("Status:", error.response?.status);
+      console.error("Data:", error.response?.data);
+      console.error(error);
+
+      alert("Failed to restock vehicle.");
+    }
+  };
 
   return (
     <>
@@ -74,10 +113,17 @@ export default function AdminDashboard() {
               <div className="flex gap-3">
                 <Link
                   to={`/vehicle/edit/${vehicle.id}`}
-                  className="bg-blue-600 text-white px-4 py-2 rounded"
+                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
                 >
                   Edit
                 </Link>
+
+                <button
+                  onClick={() => handleRestock(vehicle)}
+                  className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                >
+                  Restock
+                </button>
 
                 <button
                   onClick={() => handleDelete(vehicle.id)}
@@ -90,6 +136,39 @@ export default function AdminDashboard() {
           ))}
         </div>
       </main>
+      <Modal
+        isOpen={isModalOpen}
+        title="Restock Vehicle"
+        onClose={() => setIsModalOpen(false)}
+      >
+        <p className="mb-2 font-medium">
+          {selectedVehicle?.make} {selectedVehicle?.model}
+        </p>
+
+        <input
+          type="number"
+          placeholder="Quantity"
+          value={restockQuantity}
+          onChange={(e) => setRestockQuantity(e.target.value)}
+          className="w-full border rounded p-3 mb-5"
+        />
+
+        <div className="flex justify-end gap-3">
+          <button
+            onClick={() => setIsModalOpen(false)}
+            className="px-4 py-2 rounded border"
+          >
+            Cancel
+          </button>
+
+          <button
+            onClick={submitRestock}
+            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+          >
+            Restock
+          </button>
+        </div>
+      </Modal>
     </>
   );
 }
