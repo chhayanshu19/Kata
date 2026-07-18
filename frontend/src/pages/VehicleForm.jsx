@@ -2,14 +2,17 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import Navbar from "../components/Navbar";
+import { useToast } from "../context/ToastContext";
 import {
   getVehicle,
   createVehicle,
   updateVehicle,
 } from "../services/vehicleService";
+import Footer from "../components/Footer";
 
 export default function VehicleForm() {
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const { id } = useParams();
 
@@ -58,14 +61,18 @@ export default function VehicleForm() {
     try {
       if (isEdit) {
         await updateVehicle(id, formData);
+
+        showToast("Vehicle updated successfully!");
       } else {
         await createVehicle(formData);
+
+        showToast("Vehicle added successfully!");
       }
 
       navigate("/admin");
     } catch (error) {
       console.error(error);
-      alert("Failed to save vehicle.");
+      showToast("Failed to save vehicle.", "error");
     }
   };
 
@@ -172,6 +179,7 @@ export default function VehicleForm() {
           </button>
         </form>
       </main>
+      <Footer />
     </>
   );
 }

@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import { getVehicles, purchaseVehicle } from "../services/vehicleService";
 import LoadingSpinner from "../components/LoadingSpinner";
+import { useToast } from "../context/ToastContext";
+import Footer from "../components/Footer";
 
 export default function Dashboard() {
   const [vehicles, setVehicles] = useState([]);
@@ -11,6 +13,7 @@ export default function Dashboard() {
   const [totalPages, setTotalPages] = useState(1);
   const [category, setCategory] = useState("");
   const [ordering, setOrdering] = useState("");
+  const { showToast } = useToast();
 
   useEffect(() => {
     fetchVehicles();
@@ -32,6 +35,7 @@ export default function Dashboard() {
   async function handlePurchase(id) {
     try {
       await purchaseVehicle(id);
+      showToast("Vehicle purchased successfully!");
 
       setVehicles((prev) =>
         prev.map((vehicle) =>
@@ -44,7 +48,7 @@ export default function Dashboard() {
         ),
       );
     } catch (error) {
-      alert(error.response?.data?.error || "Purchase failed");
+      showToast(error.response?.data?.error || "Purchase failed.", "error");
     }
   }
 
@@ -133,84 +137,117 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {vehicles.map((vehicle) => {
-            const stockPct = Math.max(
-              0,
-              Math.min(100, (vehicle.quantity / 10) * 100),
-            );
+        {vehicles.length === 0 ? (
+          <div className="bg-white border border-[#E4E0D6] rounded-md shadow-sm py-20 px-8 text-center">
+            <div className="text-6xl mb-5">🚗</div>
 
-            return (
-              <div
-                key={vehicle.id}
-                className="bg-white rounded-md border border-[#E4E0D6] shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 overflow-hidden flex flex-col"
+            <h2 className="text-3xl font-black uppercase tracking-tight text-[#14161A]">
+              No Vehicles Found
+            </h2>
+
+            <p className="mt-3 text-[#7C8494] max-w-lg mx-auto">
+              We couldn't find any vehicles matching your current search or
+              selected filters.
+            </p>
+
+            {(search || category || ordering) && (
+              <button
+                onClick={() => {
+                  setSearch("");
+                  setCategory("");
+                  setOrdering("");
+                  setPage(1);
+                }}
+                className="mt-8 bg-[#C81E3A] text-white font-bold uppercase tracking-wide px-6 py-3 rounded-sm hover:bg-[#a8172f] transition-colors"
               >
-                <div className="h-1.5 w-full bg-gradient-to-r from-[#C81E3A] to-[#F2A93B]" />
+                Clear Filters
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {vehicles.map((vehicle) => {
+              const stockPct = Math.max(
+                0,
+                Math.min(100, (vehicle.quantity / 10) * 100),
+              );
 
-                <div className="p-6 flex flex-col flex-1">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <h2 className="text-xl font-black uppercase tracking-tight text-[#14161A]">
-                        {vehicle.make}
-                      </h2>
-                      <p className="text-[#7C8494] font-medium">
-                        {vehicle.model}
-                      </p>
-                    </div>
+              return (
+                <div
+                  key={vehicle.id}
+                  className="bg-white rounded-md border border-[#E4E0D6] shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 overflow-hidden flex flex-col"
+                >
+                  <div className="h-1.5 w-full bg-gradient-to-r from-[#C81E3A] to-[#F2A93B]" />
 
-                    <span className="shrink-0 border-2 border-[#14161A] rounded-sm px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-[#14161A]">
-                      {vehicle.category}
-                    </span>
-                  </div>
+                  <div className="p-6 flex flex-col flex-1">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <h2 className="text-xl font-black uppercase tracking-tight text-[#14161A]">
+                          {vehicle.make}
+                        </h2>
 
-                  <p className="mt-5 text-3xl font-mono font-bold tabular-nums text-[#14161A]">
-                    {new Intl.NumberFormat("en-IN", {
-                      style: "currency",
-                      currency: "INR",
-                      maximumFractionDigits: 0,
-                    }).format(vehicle.price)}
-                  </p>
+                        <p className="text-[#7C8494] font-medium">
+                          {vehicle.model}
+                        </p>
+                      </div>
 
-                  <div className="mt-4">
-                    <div className="flex justify-between items-center mb-1">
-                      <span
-                        className={`text-xs font-bold uppercase tracking-wide ${
-                          vehicle.quantity > 0
-                            ? "text-[#3F9C63]"
-                            : "text-[#B23A3A]"
-                        }`}
-                      >
-                        {vehicle.quantity > 0
-                          ? `In Stock · ${vehicle.quantity}`
-                          : "Out of Stock"}
+                      <span className="shrink-0 border-2 border-[#14161A] rounded-sm px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-[#14161A]">
+                        {vehicle.category}
                       </span>
                     </div>
-                    <div className="h-1.5 w-full bg-[#EDE9E0] rounded-full overflow-hidden">
-                      <div
-                        className={`h-full rounded-full ${
-                          vehicle.quantity > 0 ? "bg-[#3F9C63]" : "bg-[#B23A3A]"
-                        }`}
-                        style={{ width: `${stockPct}%` }}
-                      />
-                    </div>
-                  </div>
 
-                  <button
-                    onClick={() => handlePurchase(vehicle.id)}
-                    disabled={vehicle.quantity === 0}
-                    className={`mt-6 w-full py-3 rounded-sm font-bold uppercase tracking-wide transition-colors ${
-                      vehicle.quantity === 0
-                        ? "bg-[#D8D5CC] text-[#8A8778] cursor-not-allowed"
-                        : "bg-[#C81E3A] text-white hover:bg-[#a8172f]"
-                    }`}
-                  >
-                    {vehicle.quantity === 0 ? "Out of Stock" : "Purchase"}
-                  </button>
+                    <p className="mt-5 text-3xl font-mono font-bold tabular-nums text-[#14161A]">
+                      {new Intl.NumberFormat("en-IN", {
+                        style: "currency",
+                        currency: "INR",
+                        maximumFractionDigits: 0,
+                      }).format(vehicle.price)}
+                    </p>
+
+                    <div className="mt-4">
+                      <div className="flex justify-between items-center mb-1">
+                        <span
+                          className={`text-xs font-bold uppercase tracking-wide ${
+                            vehicle.quantity > 0
+                              ? "text-[#3F9C63]"
+                              : "text-[#B23A3A]"
+                          }`}
+                        >
+                          {vehicle.quantity > 0
+                            ? `In Stock · ${vehicle.quantity}`
+                            : "Out of Stock"}
+                        </span>
+                      </div>
+
+                      <div className="h-1.5 w-full bg-[#EDE9E0] rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full ${
+                            vehicle.quantity > 0
+                              ? "bg-[#3F9C63]"
+                              : "bg-[#B23A3A]"
+                          }`}
+                          style={{ width: `${stockPct}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => handlePurchase(vehicle.id)}
+                      disabled={vehicle.quantity === 0}
+                      className={`mt-6 w-full py-3 rounded-sm font-bold uppercase tracking-wide transition-colors ${
+                        vehicle.quantity === 0
+                          ? "bg-[#D8D5CC] text-[#8A8778] cursor-not-allowed"
+                          : "bg-[#C81E3A] text-white hover:bg-[#a8172f]"
+                      }`}
+                    >
+                      {vehicle.quantity === 0 ? "Out of Stock" : "Purchase"}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
 
         <div className="flex justify-center items-center gap-4 mt-12">
           <button
@@ -235,6 +272,7 @@ export default function Dashboard() {
           </button>
         </div>
       </main>
+      <Footer />
     </>
   );
 }

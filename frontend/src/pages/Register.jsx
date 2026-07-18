@@ -28,7 +28,7 @@ export default function Register() {
     try {
       await register(formData);
 
-      setSuccess("Registration successful!");
+      showToast("Registration successful!");
 
       setTimeout(() => {
         navigate("/login");

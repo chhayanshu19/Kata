@@ -3,10 +3,12 @@ import { useNavigate, Link } from "react-router-dom";
 
 import { login } from "../services/authService";
 import { AuthContext } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 
 export default function Login() {
   const navigate = useNavigate();
   const { loginUser } = useContext(AuthContext);
+  const { showToast } = useToast();
 
   const [formData, setFormData] = useState({
     username: "",
@@ -29,6 +31,8 @@ export default function Login() {
       const data = await login(formData);
 
       loginUser(data);
+
+      showToast("Login successful!");
 
       navigate("/dashboard");
     } catch (err) {

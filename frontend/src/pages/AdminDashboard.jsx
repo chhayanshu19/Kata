@@ -2,18 +2,22 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import Navbar from "../components/Navbar";
+import { useToast } from "../context/ToastContext";
 import {
   getVehicles,
   deleteVehicle,
   restockVehicle,
 } from "../services/vehicleService";
 import Modal from "../components/Modal";
+import Footer from "../components/Footer";
 
 export default function AdminDashboard() {
   const [vehicles, setVehicles] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [restockQuantity, setRestockQuantity] = useState("");
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const { showToast } = useToast();
 
   useEffect(() => {
     fetchVehicles();
@@ -27,25 +31,29 @@ export default function AdminDashboard() {
       console.error(error);
     }
   }
-  async function handleDelete(id) {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this vehicle?",
-    );
+  const handleDelete = (vehicle) => {
+    setSelectedVehicle(vehicle);
+    setIsDeleteModalOpen(true);
+  };
 
-    if (!confirmDelete) {
-      return;
-    }
-
+  const confirmDelete = async () => {
     try {
-      await deleteVehicle(id);
+      await deleteVehicle(selectedVehicle.id);
 
-      fetchVehicles();
+      // Close the modal first
+      setIsDeleteModalOpen(false);
+      setSelectedVehicle(null);
+
+      // Then refresh the list
+      await fetchVehicles();
+
+      showToast("Vehicle deleted successfully!");
     } catch (error) {
       console.error(error);
-
-      alert("Failed to delete vehicle.");
+      showToast("Failed to delete vehicle.", "error");
     }
-  }
+  };
+
   const handleRestock = (vehicle) => {
     setSelectedVehicle(vehicle);
 
@@ -53,28 +61,28 @@ export default function AdminDashboard() {
 
     setIsModalOpen(true);
   };
+
   const submitRestock = async () => {
     if (!restockQuantity || Number(restockQuantity) <= 0) {
-      alert("Please enter a valid quantity.");
+      showToast("Please enter a valid quantity.", "warning");
       return;
     }
 
     try {
       await restockVehicle(selectedVehicle.id, Number(restockQuantity));
 
-      const data = await getVehicles();
-
-      setVehicles(data.results);
-
+      // Close the modal FIRST
       setIsModalOpen(false);
       setSelectedVehicle(null);
       setRestockQuantity("");
-    } catch (error) {
-      console.error("Status:", error.response?.status);
-      console.error("Data:", error.response?.data);
-      console.error(error);
 
-      alert("Failed to restock vehicle.");
+      // Then refresh the list
+      await fetchVehicles();
+
+      showToast("Vehicle restocked successfully!");
+    } catch (error) {
+      console.error(error);
+      showToast("Failed to restock vehicle.", "error");
     }
   };
 
@@ -110,68 +118,92 @@ export default function AdminDashboard() {
           </Link>
         </div>
 
-        <div className="space-y-3">
-          {vehicles.map((vehicle) => (
-            <div
-              key={vehicle.id}
-              className="bg-white border border-[#E4E0D6] rounded-md p-5 flex flex-col sm:flex-row justify-between sm:items-center gap-4 shadow-sm hover:shadow-md transition-shadow"
+        {vehicles.length === 0 ? (
+          <div className="bg-white border border-[#E4E0D6] rounded-md shadow-sm py-20 px-8 text-center">
+            <div className="text-6xl mb-5">🚘</div>
+
+            <h2 className="text-3xl font-black uppercase tracking-tight text-[#14161A]">
+              No Vehicles Available
+            </h2>
+
+            <p className="mt-3 text-[#7C8494] max-w-lg mx-auto">
+              There are currently no vehicles in the inventory. Start by adding
+              your first vehicle.
+            </p>
+
+            <Link
+              to="/vehicle/new"
+              className="inline-block mt-8 bg-[#3F9C63] text-white font-bold uppercase tracking-wide px-6 py-3 rounded-sm hover:bg-[#347f51] transition-colors"
             >
-              <div className="flex items-center gap-4">
-                <span className="hidden sm:flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#14161A] text-[#F2A93B] font-mono font-bold text-xs">
-                  {vehicle.make?.slice(0, 2).toUpperCase()}
-                </span>
+              + Add First Vehicle
+            </Link>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {vehicles.map((vehicle) => (
+              <div
+                key={vehicle.id}
+                className="bg-white border border-[#E4E0D6] rounded-md p-5 flex flex-col sm:flex-row justify-between sm:items-center gap-4 shadow-sm hover:shadow-md transition-shadow"
+              >
+                <div className="flex items-center gap-4">
+                  <span className="hidden sm:flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#14161A] text-[#F2A93B] font-mono font-bold text-xs">
+                    {vehicle.make?.slice(0, 2).toUpperCase()}
+                  </span>
 
-                <div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h2 className="text-lg font-black uppercase tracking-tight text-[#14161A]">
-                      {vehicle.make} {vehicle.model}
-                    </h2>
-                    <span className="border-2 border-[#14161A] rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-[#14161A]">
-                      {vehicle.category}
-                    </span>
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h2 className="text-lg font-black uppercase tracking-tight text-[#14161A]">
+                        {vehicle.make} {vehicle.model}
+                      </h2>
+
+                      <span className="border-2 border-[#14161A] rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-[#14161A]">
+                        {vehicle.category}
+                      </span>
+                    </div>
+
+                    <p className="text-sm text-[#7C8494] font-mono mt-1">
+                      Qty on hand:{" "}
+                      <span
+                        className={`font-bold tabular-nums ${
+                          vehicle.quantity > 0
+                            ? "text-[#3F9C63]"
+                            : "text-[#B23A3A]"
+                        }`}
+                      >
+                        {vehicle.quantity}
+                      </span>
+                    </p>
                   </div>
+                </div>
 
-                  <p className="text-sm text-[#7C8494] font-mono mt-1">
-                    Qty on hand:{" "}
-                    <span
-                      className={`font-bold tabular-nums ${
-                        vehicle.quantity > 0
-                          ? "text-[#3F9C63]"
-                          : "text-[#B23A3A]"
-                      }`}
-                    >
-                      {vehicle.quantity}
-                    </span>
-                  </p>
+                <div className="flex gap-2 flex-wrap">
+                  <Link
+                    to={`/vehicle/edit/${vehicle.id}`}
+                    className="bg-[#3D4451] text-white px-4 py-2 rounded-sm font-semibold text-sm uppercase tracking-wide hover:bg-[#2c333e] transition-colors"
+                  >
+                    Edit
+                  </Link>
+
+                  <button
+                    onClick={() => handleRestock(vehicle)}
+                    className="bg-[#F2A93B] text-[#14161A] px-4 py-2 rounded-sm font-semibold text-sm uppercase tracking-wide hover:bg-[#dc9527] transition-colors"
+                  >
+                    Restock
+                  </button>
+
+                  <button
+                    onClick={() => handleDelete(vehicle)}
+                    className="bg-[#B23A3A] text-white px-4 py-2 rounded-sm font-semibold text-sm uppercase tracking-wide hover:bg-[#942e2e] transition-colors"
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
-
-              <div className="flex gap-2 flex-wrap">
-                <Link
-                  to={`/vehicle/edit/${vehicle.id}`}
-                  className="bg-[#3D4451] text-white px-4 py-2 rounded-sm font-semibold text-sm uppercase tracking-wide hover:bg-[#2c333e] transition-colors"
-                >
-                  Edit
-                </Link>
-
-                <button
-                  onClick={() => handleRestock(vehicle)}
-                  className="bg-[#F2A93B] text-[#14161A] px-4 py-2 rounded-sm font-semibold text-sm uppercase tracking-wide hover:bg-[#dc9527] transition-colors"
-                >
-                  Restock
-                </button>
-
-                <button
-                  onClick={() => handleDelete(vehicle.id)}
-                  className="bg-[#B23A3A] text-white px-4 py-2 rounded-sm font-semibold text-sm uppercase tracking-wide hover:bg-[#942e2e] transition-colors"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </main>
+      <Footer />
       <Modal
         isOpen={isModalOpen}
         title="Restock Vehicle"
@@ -205,6 +237,41 @@ export default function AdminDashboard() {
             className="bg-[#3F9C63] text-white px-4 py-2 rounded-sm font-semibold text-sm uppercase tracking-wide hover:bg-[#347f51] transition-colors"
           >
             Restock
+          </button>
+        </div>
+      </Modal>
+      <Modal
+        isOpen={isDeleteModalOpen}
+        title="Delete Vehicle"
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setSelectedVehicle(null);
+        }}
+      >
+        <p className="text-gray-700 mb-6">
+          Are you sure you want to delete{" "}
+          <span className="font-bold">
+            {selectedVehicle?.make} {selectedVehicle?.model}
+          </span>
+          ?
+        </p>
+
+        <div className="flex justify-end gap-3">
+          <button
+            onClick={() => {
+              setIsDeleteModalOpen(false);
+              setSelectedVehicle(null);
+            }}
+            className="px-4 py-2 border rounded hover:bg-gray-100"
+          >
+            Cancel
+          </button>
+
+          <button
+            onClick={confirmDelete}
+            className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+          >
+            Delete
           </button>
         </div>
       </Modal>
