@@ -48,7 +48,7 @@ class VehicleTest(APITestCase):
         self.assertEqual(len(response.data),1)
     
     def test_update_vehicle(self):
-        vehicle=Vehicles.objects.create(
+        vehicle = Vehicles.objects.create(
             make="BMW",
             model="M4",
             category="Sports",
@@ -56,7 +56,7 @@ class VehicleTest(APITestCase):
             quantity=5
         )
 
-        response=self.client.put(
+        response = self.client.put(
             f"/api/vehicles/{vehicle.id}/",
             {
                 "make": "BMW",
@@ -67,23 +67,14 @@ class VehicleTest(APITestCase):
             },
             format="json"
         )
-        self.assertEqual(response.status_code,status.HTTP_200_OK)
 
-    def test_delete_vehicle(self):
-            
-        vehicle = Vehicles.objects.create(
-            make="BMW",
-            model="M4",
-            category="Sports",
-            price=8500000,
-            quantity=5
-        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        response = self.client.delete(
-            f"/api/vehicles/{vehicle.id}/"
-        )
+        vehicle.refresh_from_db()
 
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(vehicle.model, "M5")
+        self.assertEqual(vehicle.quantity, 3)
+
 
     def test_purchase_vehicle(self):
         vehicle = Vehicles.objects.create(
@@ -113,3 +104,84 @@ class VehicleTest(APITestCase):
             f"/api/vehicles/{vehicle.id}/purchase/"
         )
         self.assertEqual(response.status_code,status.HTTP_400_BAD_REQUEST)
+    
+    def test_restock_vehicle(self):
+        self.user.is_staff = True
+        self.user.save()
+
+        vehicle = Vehicles.objects.create(
+            make="BMW",
+            model="M4",
+            category="Sports",
+            price=8500000,
+            quantity=5
+        )
+
+        response = self.client.post(
+            f"/api/vehicles/{vehicle.id}/restock/",
+            {
+                "quantity": 10
+            },
+            format="json"
+        )
+
+        vehicle.refresh_from_db()
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(vehicle.quantity, 15)
+    
+    def test_non_admin_cannot_restock(self):
+
+        vehicle = Vehicles.objects.create(
+            make="BMW",
+            model="M4",
+            category="Sports",
+            price=8500000,
+            quantity=5
+        )
+
+        response = self.client.post(
+            f"/api/vehicles/{vehicle.id}/restock/",
+            {
+                "quantity": 10
+            },
+            format="json"
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_admin_can_delete_vehicle(self):
+        self.user.is_staff=True
+        self.user.save()
+
+        vehicle=Vehicles.objects.create(
+            make="BMW",
+            model="M4",
+            category="Sports",
+            price=8500000,
+            quantity=5
+        )
+
+        response = self.client.delete(
+            f"/api/vehicles/{vehicle.id}/"
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(Vehicles.objects.count(), 0)
+
+    def test_non_admin_cannot_delete_vehicle(self):
+
+        vehicle = Vehicles.objects.create(
+            make="BMW",
+            model="M4",
+            category="Sports",
+            price=8500000,
+            quantity=5
+        )
+
+        response = self.client.delete(
+            f"/api/vehicles/{vehicle.id}/"
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(Vehicles.objects.count(), 1)
