@@ -45,7 +45,8 @@ class VehicleTest(APITestCase):
 
         response=self.client.get("/api/vehicles/")
         self.assertEqual(response.status_code,status.HTTP_200_OK)
-        self.assertEqual(len(response.data),1)
+        self.assertEqual(response.data["count"], 1)
+        self.assertEqual(len(response.data["results"]), 1)
     
     def test_update_vehicle(self):
         vehicle = Vehicles.objects.create(
@@ -185,3 +186,144 @@ class VehicleTest(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(Vehicles.objects.count(), 1)
+
+    def test_invalid_price(self):
+        response=self.client.post(
+            "/api/vehicles/",
+            {
+                "make":"BMW",
+                "model":"M4",
+                "category":"Sports",
+                "price":-100,
+                "quantity":5
+            },
+            format="json"
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_400_BAD_REQUEST
+        )
+    
+    def test_invalid_quantity(self):
+
+        response=self.client.post(
+            "/api/vehicles/",
+            {
+                "make":"BMW",
+                "model":"M4",
+                "category":"Sports",
+                "price":100,
+                "quantity":-5
+            },
+            format="json"
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_400_BAD_REQUEST
+        )
+
+    def test_search_by_make(self):
+
+        Vehicles.objects.create(
+            make="BMW",
+            model="M4",
+            category="Sports",
+            price=100,
+            quantity=5
+        )
+
+        Vehicles.objects.create(
+            make="Audi",
+            model="A4",
+            category="Sedan",
+            price=200,
+            quantity=3
+        )
+
+        response=self.client.get(
+            "/api/vehicles/?search=BMW"
+        )
+
+        self.assertEqual(response.status_code,status.HTTP_200_OK)
+        self.assertEqual(len(response.data["results"]),1)
+
+    def test_search_by_model(self):
+
+        Vehicles.objects.create(
+            make="BMW",
+            model="M4",
+            category="Sports",
+            price=100,
+            quantity=5
+        )
+
+        Vehicles.objects.create(
+            make="BMW",
+            model="X5",
+            category="SUV",
+            price=200,
+            quantity=5
+        )
+
+        response = self.client.get(
+            "/api/vehicles/?search=M4"
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["count"], 1)
+    
+    def test_filter_by_category(self):
+
+        Vehicles.objects.create(
+            make="BMW",
+            model="M4",
+            category="Sports",
+            price=100,
+            quantity=5
+        )
+
+        Vehicles.objects.create(
+            make="Toyota",
+            model="Fortuner",
+            category="SUV",
+            price=200,
+            quantity=5
+        )
+
+        response = self.client.get(
+            "/api/vehicles/?category=Sports"
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["count"], 1)
+
+    def test_order_by_price(self):
+
+        Vehicles.objects.create(
+            make="BMW",
+            model="M4",
+            category="Sports",
+            price=500,
+            quantity=5
+        )
+
+        Vehicles.objects.create(
+            make="Audi",
+            model="A4",
+            category="Sedan",
+            price=100,
+            quantity=5
+        )
+
+        response = self.client.get(
+            "/api/vehicles/?ordering=price"
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        results = response.data["results"]
+
+        self.assertEqual(results[0]["price"], "100.00")
+        self.assertEqual(results[1]["price"], "500.00")

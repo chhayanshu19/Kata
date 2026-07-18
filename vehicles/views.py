@@ -81,7 +81,7 @@ class RestockVehicleView(APIView):
         )
 
 class VehicleListCreateView(generics.ListCreateAPIView):
-    queryset = Vehicles.objects.all()
+    queryset = Vehicles.objects.all().order_by("id")
     serializer_class = VehicleSerializer
     permission_classes = [IsAuthenticated]
 
