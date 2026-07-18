@@ -44,6 +44,16 @@ export const updateVehicle = async (id, vehicleData) => {
   return response.data;
 };
 
+export const deleteVehicle = async (id) => {
+  const response = await api.delete(`/vehicles/${id}/`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+    },
+  });
+
+  return response.data;
+};
+
 export const purchaseVehicle = async (id) => {
   const response = await api.post(
     `/vehicles/${id}/purchase/`,

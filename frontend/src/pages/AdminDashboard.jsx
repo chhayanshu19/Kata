@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import Navbar from "../components/Navbar";
-import { getVehicles } from "../services/vehicleService";
+import { getVehicles, deleteVehicle } from "../services/vehicleService";
 
 export default function AdminDashboard() {
   const [vehicles, setVehicles] = useState([]);
@@ -17,6 +17,25 @@ export default function AdminDashboard() {
       setVehicles(data.results);
     } catch (error) {
       console.error(error);
+    }
+  }
+  async function handleDelete(id) {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this vehicle?",
+    );
+
+    if (!confirmDelete) {
+      return;
+    }
+
+    try {
+      await deleteVehicle(id);
+
+      fetchVehicles();
+    } catch (error) {
+      console.error(error);
+
+      alert("Failed to delete vehicle.");
     }
   }
 
@@ -60,7 +79,10 @@ export default function AdminDashboard() {
                   Edit
                 </Link>
 
-                <button className="bg-red-600 text-white px-4 py-2 rounded">
+                <button
+                  onClick={() => handleDelete(vehicle.id)}
+                  className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                >
                   Delete
                 </button>
               </div>
