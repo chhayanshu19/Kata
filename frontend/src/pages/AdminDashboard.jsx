@@ -82,52 +82,88 @@ export default function AdminDashboard() {
     <>
       <Navbar />
 
-      <main className="max-w-6xl mx-auto px-6 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold">Admin Dashboard</h1>
+      <main className="max-w-6xl mx-auto px-6 py-10 bg-[#F7F5F0] min-h-screen">
+        <div className="flex justify-between items-center mb-8 gap-4 flex-wrap">
+          <div>
+            <span className="text-[10px] font-mono uppercase tracking-[0.3em] text-[#B23A3A]">
+              Back Office
+            </span>
+            <h1 className="text-4xl font-black uppercase tracking-tight text-[#14161A] mt-1">
+              Admin Dashboard
+            </h1>
+          </div>
 
           <Link
             to="/vehicle/new"
-            className="bg-green-600 text-white px-5 py-3 rounded hover:bg-green-700"
+            className="flex items-center gap-2 bg-[#3F9C63] text-white px-5 py-3 rounded-sm font-bold uppercase tracking-wide text-sm hover:bg-[#347f51] transition-colors"
           >
-            + Add Vehicle
+            <svg
+              viewBox="0 0 24 24"
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+            >
+              <path d="M12 5v14M5 12h14" strokeLinecap="round" />
+            </svg>
+            Add Vehicle
           </Link>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           {vehicles.map((vehicle) => (
             <div
               key={vehicle.id}
-              className="border rounded-lg p-5 flex justify-between items-center shadow"
+              className="bg-white border border-[#E4E0D6] rounded-md p-5 flex flex-col sm:flex-row justify-between sm:items-center gap-4 shadow-sm hover:shadow-md transition-shadow"
             >
-              <div>
-                <h2 className="text-xl font-bold">
-                  {vehicle.make} {vehicle.model}
-                </h2>
+              <div className="flex items-center gap-4">
+                <span className="hidden sm:flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#14161A] text-[#F2A93B] font-mono font-bold text-xs">
+                  {vehicle.make?.slice(0, 2).toUpperCase()}
+                </span>
 
-                <p>{vehicle.category}</p>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h2 className="text-lg font-black uppercase tracking-tight text-[#14161A]">
+                      {vehicle.make} {vehicle.model}
+                    </h2>
+                    <span className="border-2 border-[#14161A] rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-[#14161A]">
+                      {vehicle.category}
+                    </span>
+                  </div>
 
-                <p>Quantity : {vehicle.quantity}</p>
+                  <p className="text-sm text-[#7C8494] font-mono mt-1">
+                    Qty on hand:{" "}
+                    <span
+                      className={`font-bold tabular-nums ${
+                        vehicle.quantity > 0
+                          ? "text-[#3F9C63]"
+                          : "text-[#B23A3A]"
+                      }`}
+                    >
+                      {vehicle.quantity}
+                    </span>
+                  </p>
+                </div>
               </div>
 
-              <div className="flex gap-3">
+              <div className="flex gap-2 flex-wrap">
                 <Link
                   to={`/vehicle/edit/${vehicle.id}`}
-                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                  className="bg-[#3D4451] text-white px-4 py-2 rounded-sm font-semibold text-sm uppercase tracking-wide hover:bg-[#2c333e] transition-colors"
                 >
                   Edit
                 </Link>
 
                 <button
                   onClick={() => handleRestock(vehicle)}
-                  className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                  className="bg-[#F2A93B] text-[#14161A] px-4 py-2 rounded-sm font-semibold text-sm uppercase tracking-wide hover:bg-[#dc9527] transition-colors"
                 >
                   Restock
                 </button>
 
                 <button
                   onClick={() => handleDelete(vehicle.id)}
-                  className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                  className="bg-[#B23A3A] text-white px-4 py-2 rounded-sm font-semibold text-sm uppercase tracking-wide hover:bg-[#942e2e] transition-colors"
                 >
                   Delete
                 </button>
@@ -141,29 +177,32 @@ export default function AdminDashboard() {
         title="Restock Vehicle"
         onClose={() => setIsModalOpen(false)}
       >
-        <p className="mb-2 font-medium">
+        <p className="mb-3 font-mono font-bold uppercase tracking-wide text-[#14161A]">
           {selectedVehicle?.make} {selectedVehicle?.model}
         </p>
 
+        <label className="block text-xs font-mono uppercase tracking-widest text-[#7C8494] mb-1">
+          Quantity to add
+        </label>
         <input
           type="number"
-          placeholder="Quantity"
+          placeholder="0"
           value={restockQuantity}
           onChange={(e) => setRestockQuantity(e.target.value)}
-          className="w-full border rounded p-3 mb-5"
+          className="w-full border border-[#D8D5CC] rounded-sm p-3 mb-5 focus:outline-none focus:ring-2 focus:ring-[#F2A93B] focus:border-transparent transition"
         />
 
         <div className="flex justify-end gap-3">
           <button
             onClick={() => setIsModalOpen(false)}
-            className="px-4 py-2 rounded border"
+            className="px-4 py-2 rounded-sm border border-[#D8D5CC] font-semibold text-sm uppercase tracking-wide hover:bg-[#F7F5F0] transition-colors"
           >
             Cancel
           </button>
 
           <button
             onClick={submitRestock}
-            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+            className="bg-[#3F9C63] text-white px-4 py-2 rounded-sm font-semibold text-sm uppercase tracking-wide hover:bg-[#347f51] transition-colors"
           >
             Restock
           </button>

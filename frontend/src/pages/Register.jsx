@@ -43,51 +43,84 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-100">
+    <div
+      className="min-h-screen flex items-center justify-center bg-[#14161A] px-4"
+      style={{
+        backgroundImage: "radial-gradient(#2A2E36 1px, transparent 1px)",
+        backgroundSize: "22px 22px",
+      }}
+    >
       <form
         onSubmit={handleSubmit}
-        className="bg-white p-8 rounded-xl shadow-lg w-96"
+        className="bg-white p-8 rounded-md shadow-2xl w-full max-w-sm border-t-4 border-[#3F9C63]"
       >
-        <h1 className="text-3xl font-bold mb-6 text-center">Register</h1>
+        <div className="mb-7 text-center">
+          <span className="inline-block text-[10px] font-mono uppercase tracking-[0.3em] text-[#F2A93B] bg-[#14161A] px-3 py-1 rounded-sm mb-3">
+            Kata Motors
+          </span>
+          <h1 className="text-3xl font-black uppercase tracking-tight text-[#14161A]">
+            Create Account
+          </h1>
+        </div>
 
-        {error && <p className="text-red-600 mb-3">{error}</p>}
+        {error && (
+          <p className="text-[#B23A3A] text-sm font-medium mb-3 bg-[#B23A3A]/10 border border-[#B23A3A]/30 rounded-sm px-3 py-2 break-words">
+            {error}
+          </p>
+        )}
 
-        {success && <p className="text-green-600 mb-3">{success}</p>}
+        {success && (
+          <p className="text-[#3F9C63] text-sm font-medium mb-3 bg-[#3F9C63]/10 border border-[#3F9C63]/30 rounded-sm px-3 py-2">
+            {success}
+          </p>
+        )}
 
+        <label className="block text-xs font-mono uppercase tracking-widest text-[#7C8494] mb-1">
+          Username
+        </label>
         <input
           type="text"
           name="username"
-          placeholder="Username"
+          placeholder="Choose a username"
           value={formData.username}
           onChange={handleChange}
-          className="w-full border p-3 rounded mb-4"
+          className="w-full border border-[#D8D5CC] p-3 rounded-sm mb-4 focus:outline-none focus:ring-2 focus:ring-[#3F9C63] focus:border-transparent transition"
         />
 
+        <label className="block text-xs font-mono uppercase tracking-widest text-[#7C8494] mb-1">
+          Email
+        </label>
         <input
           type="email"
           name="email"
-          placeholder="Email"
+          placeholder="you@example.com"
           value={formData.email}
           onChange={handleChange}
-          className="w-full border p-3 rounded mb-4"
+          className="w-full border border-[#D8D5CC] p-3 rounded-sm mb-4 focus:outline-none focus:ring-2 focus:ring-[#3F9C63] focus:border-transparent transition"
         />
 
+        <label className="block text-xs font-mono uppercase tracking-widest text-[#7C8494] mb-1">
+          Password
+        </label>
         <input
           type="password"
           name="password"
-          placeholder="Password"
+          placeholder="Create a password"
           value={formData.password}
           onChange={handleChange}
-          className="w-full border p-3 rounded mb-6"
+          className="w-full border border-[#D8D5CC] p-3 rounded-sm mb-6 focus:outline-none focus:ring-2 focus:ring-[#3F9C63] focus:border-transparent transition"
         />
 
-        <button className="w-full bg-green-600 text-white p-3 rounded hover:bg-green-700">
+        <button className="w-full bg-[#3F9C63] text-white font-bold uppercase tracking-wide p-3 rounded-sm hover:bg-[#347f51] transition-colors">
           Register
         </button>
 
-        <p className="mt-5 text-center">
+        <p className="mt-6 text-center text-sm text-[#3D4451]">
           Already have an account?{" "}
-          <Link to="/login" className="text-blue-600">
+          <Link
+            to="/login"
+            className="text-[#C81E3A] font-semibold hover:underline"
+          >
             Login
           </Link>
         </p>
