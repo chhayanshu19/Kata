@@ -170,13 +170,13 @@ npm run dev
 
 ## Login
 
-![Login](screenshots/login.png)
+![Login](screenshots/Login.png)
 
 ---
 
 ## Customer Dashboard
 
-![Dashboard](screenshots/dashboard.png)
+![Dashboard](screenshots/Dashboard.png)
 
 ---
 
