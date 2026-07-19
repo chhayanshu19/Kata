@@ -46,3 +46,13 @@ class VehicleSerializer(serializers.ModelSerializer):
             )
 
         return attrs
+
+    def validate_make(self, value):
+        if not value.strip():
+            raise serializers.ValidationError("Make is required.")
+        return value.strip()
+
+    def validate_model(self, value):
+        if not value.strip():
+            raise serializers.ValidationError("Model is required.")
+        return value.strip()
