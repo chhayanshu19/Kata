@@ -4,6 +4,7 @@ import { getVehicles, purchaseVehicle } from "../services/vehicleService";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { useToast } from "../context/ToastContext";
 import Footer from "../components/Footer";
+import Modal from "../components/Modal";
 
 export default function Dashboard() {
   const [vehicles, setVehicles] = useState([]);
@@ -13,6 +14,8 @@ export default function Dashboard() {
   const [totalPages, setTotalPages] = useState(1);
   const [category, setCategory] = useState("");
   const [ordering, setOrdering] = useState("");
+  const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
+  const [selectedVehicle, setSelectedVehicle] = useState(null);
   const { showToast } = useToast();
 
   useEffect(() => {
@@ -32,23 +35,23 @@ export default function Dashboard() {
     }
   }
 
-  async function handlePurchase(id) {
+  async function handlePurchase() {
     try {
-      await purchaseVehicle(id);
+      await purchaseVehicle(selectedVehicle.id);
+
       showToast("Vehicle purchased successfully!");
 
-      setVehicles((prev) =>
-        prev.map((vehicle) =>
-          vehicle.id === id
-            ? {
-                ...vehicle,
-                quantity: vehicle.quantity - 1,
-              }
-            : vehicle,
-        ),
-      );
+      setIsPurchaseModalOpen(false);
+      setSelectedVehicle(null);
+
+      await fetchVehicles();
     } catch (error) {
+      setIsPurchaseModalOpen(false);
+      setSelectedVehicle(null);
+
       showToast(error.response?.data?.error || "Purchase failed.", "error");
+
+      fetchVehicles();
     }
   }
 
@@ -232,7 +235,10 @@ export default function Dashboard() {
                     </div>
 
                     <button
-                      onClick={() => handlePurchase(vehicle.id)}
+                      onClick={() => {
+                        setSelectedVehicle(vehicle);
+                        setIsPurchaseModalOpen(true);
+                      }}
                       disabled={vehicle.quantity === 0}
                       className={`mt-6 w-full py-3 rounded-sm font-bold uppercase tracking-wide transition-colors ${
                         vehicle.quantity === 0
@@ -272,6 +278,63 @@ export default function Dashboard() {
           </button>
         </div>
       </main>
+      <Modal
+        isOpen={isPurchaseModalOpen}
+        title="Confirm Purchase"
+        onClose={() => {
+          setIsPurchaseModalOpen(false);
+          setSelectedVehicle(null);
+        }}
+      >
+        <div className="space-y-4">
+          <div>
+            <h3 className="text-xl font-black">
+              {selectedVehicle?.make} {selectedVehicle?.model}
+            </h3>
+
+            <p className="text-[#7C8494]">{selectedVehicle?.category}</p>
+          </div>
+
+          <div className="border rounded p-4 bg-[#F7F5F0]">
+            <p>
+              <strong>Price:</strong>{" "}
+              {selectedVehicle &&
+                new Intl.NumberFormat("en-IN", {
+                  style: "currency",
+                  currency: "INR",
+                  maximumFractionDigits: 0,
+                }).format(selectedVehicle.price)}
+            </p>
+
+            <p>
+              <strong>Available Stock:</strong> {selectedVehicle?.quantity}
+            </p>
+          </div>
+
+          <p className="text-gray-700">
+            Are you sure you want to purchase this vehicle?
+          </p>
+
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={() => {
+                setIsPurchaseModalOpen(false);
+                setSelectedVehicle(null);
+              }}
+              className="px-4 py-2 border rounded"
+            >
+              Cancel
+            </button>
+
+            <button
+              onClick={handlePurchase}
+              className="bg-[#3F9C63] text-white px-4 py-2 rounded hover:bg-[#347f51]"
+            >
+              Confirm Purchase
+            </button>
+          </div>
+        </div>
+      </Modal>
       <Footer />
     </>
   );

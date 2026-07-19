@@ -72,7 +72,13 @@ export default function VehicleForm() {
       navigate("/admin");
     } catch (error) {
       console.error(error);
-      showToast("Failed to save vehicle.", "error");
+      const message =
+        error.response?.data?.non_field_errors?.[0] ||
+        error.response?.data?.detail ||
+        error.response?.data ||
+        "Failed to save vehicle.";
+
+      showToast(message, "error");
     }
   };
 
