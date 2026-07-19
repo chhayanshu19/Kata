@@ -1,5 +1,7 @@
 # 🚗 Kata Motors
 
+A secure role-based Vehicle Inventory Management System that enables customers to browse and purchase vehicles while allowing administrators to manage inventory through a dedicated dashboard.
+
 A full-stack **Vehicle Inventory Management System** built with **React**, **Django REST Framework**, and **PostgreSQL**.
 
 The system provides secure JWT authentication, role-based access control, vehicle inventory management, stock operations, search, filtering, sorting, pagination, and a responsive modern user interface.
@@ -147,6 +149,8 @@ pip install -r requirements.txt
 
 python manage.py migrate
 
+python manage.py createsuperuser
+
 python manage.py runserver
 ```
 
@@ -193,6 +197,75 @@ npm run dev
 ![Purchase Modal](screenshots/PurchaseConfirmModal.png)
 
 ---
+
+# Test Report
+
+The backend was tested using **Django's built-in testing framework** and **Django REST Framework's APITestCase**.
+
+## Test Command
+
+```bash
+python manage.py test
+```
+
+## Test Results
+
+```text
+Found 17 test(s).
+Creating test database for alias 'default'...
+System check identified no issues (0 silenced).
+.................
+----------------------------------------------------------------------
+Ran 17 tests in 17.986s
+
+OK
+
+Destroying test database for alias 'default'...
+```
+
+## Test Coverage
+
+### Authentication (2 Tests)
+
+- ✅ User Registration
+- ✅ User Login
+
+### Vehicle CRUD Operations (3 Tests)
+
+- ✅ Create Vehicle
+- ✅ Retrieve Vehicle List
+- ✅ Update Vehicle
+
+### Inventory Operations (4 Tests)
+
+- ✅ Purchase Vehicle
+- ✅ Purchase Out-of-Stock Vehicle
+- ✅ Restock Vehicle
+- ✅ Prevent Non-Admin Restocking
+
+### Authorization (2 Tests)
+
+- ✅ Admin Can Delete Vehicle
+- ✅ Non-Admin Cannot Delete Vehicle
+
+### Validation (2 Tests)
+
+- ✅ Invalid Price Validation
+- ✅ Invalid Quantity Validation
+
+### Search & Filtering (4 Tests)
+
+- ✅ Search by Make
+- ✅ Search by Model
+- ✅ Filter by Category
+- ✅ Order by Price
+
+## Summary
+
+- **Total Tests:** 17
+- **Passed:** 17
+- **Failed:** 0
+- **Result:** ✅ All tests passed successfully.
 
 # My AI Usage
 

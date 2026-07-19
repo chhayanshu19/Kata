@@ -1,101 +1,98 @@
----
+# PROMPTS.md
 
-# PROMPT.md
+# AI Tool
 
-This should be much more technical.
-
-````md
-# AI Usage Report
-
-This document summarizes how AI assistance was used during the development of this project.
+- ChatGPT (OpenAI)
+- Claude AI
 
 ---
 
-# AI Model
+# Prompt History
 
-ChatGPT (OpenAI)
+## 1. Project Planning
 
----
-
-# AI Assisted Tasks
-
-## Backend
-
-- JWT Authentication
-- DRF Serializer Validation
-- Pagination
-- Search
-- Filtering
-- Ordering
-- Purchase Endpoint
-- Restock Endpoint
-- Permission Classes
+> Help me build a full-stack Vehicle Inventory Management System using Django REST Framework, PostgreSQL and React. Guide me step by step assuming I don't know this tech stack.
 
 ---
 
-## Frontend
+## 2. Backend Setup
 
-- React Authentication Context
-- Protected Routes
-- Axios API Layer
-- Dashboard UI
-- Admin Dashboard
-- Vehicle Form
-- Purchase Modal
-- Delete Modal
-- Restock Modal
-- Toast Notifications
-- Loading Spinner
-- Empty States
-- Responsive Layout
+> Help me initialize the Django project with PostgreSQL.
+
+> Create JWT authentication using Django REST Framework SimpleJWT.
+
+> Create user registration and login APIs.
 
 ---
 
-## Debugging
+## 3. Vehicle Management
 
-AI assisted with debugging:
+> Create CRUD APIs for vehicle management.
 
-- JWT Token Expiration
-- React Routing
-- Django Serializer Validation
-- PostgreSQL Configuration
-- Axios Authentication Headers
-- Modal State Management
-- Form Validation
+> Add role-based permissions so only admins can create, update and delete vehicles.
+
+> Implement purchase and restock APIs.
+
+> Prevent duplicate vehicles based on make and model.
 
 ---
 
-# Development Approach
+## 4. Search & Filtering
 
-The project was implemented incrementally.
-
-Major milestones included:
-
-1. Backend setup
-2. JWT authentication
-3. Vehicle CRUD APIs
-4. Purchase workflow
-5. Admin features
-6. React authentication
-7. Dashboard implementation
-8. UI enhancements
-9. Final validation
-10. Testing
+> Implement search, filtering, ordering and pagination using Django Filters and DRF.
 
 ---
 
-# Human Contributions
+## 5. Testing
 
-The developer was responsible for:
+> Help me write API tests for authentication, CRUD operations, inventory operations, permissions and validation.
 
-- Project architecture decisions
-- Feature implementation
-- API testing
-- UI customization
-- Database design
-- Integration
-- Git version control
-- Debugging
-- Final testing
+---
 
-AI was used as a programming assistant and code reviewer.
+## 6. React Frontend
+
+> Create the React project structure.
+
+> Implement authentication using Context API.
+
+> Create protected routes.
+
+> Connect the frontend with the backend using Axios.
+
+---
+
+## 7. UI Development
+
+> Design a modern dashboard using Tailwind CSS.
+
+> Improve the UI with loading indicators, empty states and reusable modal components.
+
+> Implement toast notifications.
+
+> Create confirmation dialogs for purchase, delete and restock actions.
+
+---
+
+## 8. Debugging
+
+> Help debug JWT token expiration.
+
+> Fix PostgreSQL connection issues.
+
+> Debug React routing and modal state issues.
+
+> Validate form submissions.
+
+---
+
+## 9. Documentation
+
+> Help create a professional README.
+
+> Help prepare project documentation for submission.
+
+---
+
+# Reflection
+
+AI was used throughout the project as a technical assistant for planning, debugging, learning unfamiliar concepts, and improving code quality. All generated suggestions were reviewed, tested, modified where necessary, and integrated manually into the project. AI accelerated development while helping me better understand Django, React, JWT authentication, REST APIs, and frontend architecture.
